@@ -1,0 +1,41 @@
+<div class="login-page">
+
+  <div class="login-card">
+    <h1 class="app-title">TMS – Transport Management</h1>
+    <h2 class="login-title">Connexion</h2>
+
+    <form (ngSubmit)="onLogin()" class="login-form">
+      <div class="form-group">
+        <label for="username">Nom d'utilisateur</label>
+        <input
+          id="username"
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          required
+          autocomplete="username"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="password">Mot de passe</label>
+        <input
+          id="password"
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          required
+          autocomplete="current-password"
+        />
+      </div>
+
+      <button type="submit" class="btn-primary">
+        Se connecter
+      </button>
+
+      <p *ngIf="errorMessage" class="error-msg">
+        {{ errorMessage }}
+      </p>
+    </form>
+  </div>
+</div>

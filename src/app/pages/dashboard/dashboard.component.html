@@ -1,0 +1,49 @@
+<div class="dashboard">
+    <header class="topbar">
+      <div class="logo">Dashboard</div>
+      <div class="user">
+        <span class="user-name">
+          {{ username || 'Utilisateur' }}
+        </span>
+        <button (click)="logout()" class="btn-logout">
+          Déconnexion
+        </button>
+      </div>
+    </header>
+  
+    <main class="content">
+      <h1>Vue d'ensemble</h1>
+      <p>
+        Tableau de bord centralisé pour la gestion intelligente de votre flotte de transport
+      </p>
+  
+      <div class="cards">
+        <div class="card">
+          <span class="card-icon">🚍</span>
+          <span class="card-badge">En ligne</span>
+          <div>Nombre de bus en circulation</div>
+          <span class="card-value">42</span>
+          <span class="card-label">Véhicules actifs</span>
+          <div class="card-progress"></div>
+        </div>
+  
+        <div class="card">
+          <span class="card-icon">👨‍✈️</span>
+          <span class="card-badge">Disponible</span>
+          <div>Chauffeurs actifs</div>
+          <span class="card-value">38</span>
+          <span class="card-label">En service</span>
+          <div class="card-progress"></div>
+        </div>
+  
+        <div class="card">
+          <span class="card-icon">⚠️</span>
+          <span class="card-badge">Urgent</span>
+          <div>Alertes d'incidents</div>
+          <span class="card-value">3</span>
+          <span class="card-label">À traiter</span>
+          <div class="card-progress"></div>
+        </div>
+      </div>
+    </main>
+  </div>
