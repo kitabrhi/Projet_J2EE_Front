@@ -1,49 +1,42 @@
-<div class="dashboard">
-    <header class="topbar">
-      <div class="logo">Dashboard</div>
-      <div class="user">
-        <span class="user-name">
-          {{ username || 'Utilisateur' }}
-        </span>
-        <button (click)="logout()" class="btn-logout">
-          Déconnexion
-        </button>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">TMS</div>
+      <div>
+        <div class="title">Dashboard</div>
+        <div class="sub">Transport Management</div>
       </div>
-    </header>
-  
-    <main class="content">
-      <h1>Vue d'ensemble</h1>
-      <p>
-        Tableau de bord centralisé pour la gestion intelligente de votre flotte de transport
-      </p>
-  
-      <div class="cards">
-        <div class="card">
-          <span class="card-icon">🚍</span>
-          <span class="card-badge">En ligne</span>
-          <div>Nombre de bus en circulation</div>
-          <span class="card-value">42</span>
-          <span class="card-label">Véhicules actifs</span>
-          <div class="card-progress"></div>
-        </div>
-  
-        <div class="card">
-          <span class="card-icon">👨‍✈️</span>
-          <span class="card-badge">Disponible</span>
-          <div>Chauffeurs actifs</div>
-          <span class="card-value">38</span>
-          <span class="card-label">En service</span>
-          <div class="card-progress"></div>
-        </div>
-  
-        <div class="card">
-          <span class="card-icon">⚠️</span>
-          <span class="card-badge">Urgent</span>
-          <div>Alertes d'incidents</div>
-          <span class="card-value">3</span>
-          <span class="card-label">À traiter</span>
-          <div class="card-progress"></div>
+    </div>
+
+    <nav class="menu">
+      <a routerLink="vehicles" routerLinkActive="active">🚍 Véhicules</a>
+      <a routerLink="alerts" routerLinkActive="active">🚨 Alertes</a>
+      <a routerLink="incidents" routerLinkActive="active">⚠️ Incidents</a>
+      <a routerLink="planning" routerLinkActive="active">🗓️ Planification</a>
+    </nav>
+
+    <div class="userBox">
+      <div class="userLeft">
+        <div class="dot"></div>
+        <div class="userInfo">
+          <div class="name">{{ username }}</div>
+          <div class="role">Connected</div>
         </div>
       </div>
-    </main>
-  </div>
+      <button class="logout" (click)="logout()">Logout</button>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="topbar">
+      <div class="welcome">
+        <div class="hello">Salut {{ username }} 👋</div>
+        <div class="hint">Choisis une section dans la sidebar.</div>
+      </div>
+    </div>
+
+    <div class="page">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,117 @@
+<div class="page">
+
+  <div class="header">
+    <h2>🚍 Gestion des Véhicules</h2>
+
+    <div class="messages">
+      <div class="success" *ngIf="success">{{ success }}</div>
+      <div class="error" *ngIf="error">{{ error }}</div>
+    </div>
+  </div>
+
+  <!-- FILTER -->
+  <div class="card">
+    <div class="cardTitle">Filtrer</div>
+    <div class="row">
+      <input type="number" [(ngModel)]="filterLineId" placeholder="Line ID (optionnel)" />
+      <button (click)="loadVehicles()">Appliquer</button>
+      <button class="ghost" (click)="filterLineId=null; loadVehicles()">Reset</button>
+    </div>
+  </div>
+
+  <!-- CREATE -->
+  <div class="card">
+    <div class="cardTitle">Créer un véhicule</div>
+    <div class="row">
+      <input [(ngModel)]="newCode" placeholder="Code (ex: BUS_104) *" />
+      <input type="number" [(ngModel)]="newLineId" placeholder="Line ID (optionnel)" />
+      <input type="number" [(ngModel)]="newDriverId" placeholder="Driver ID (optionnel)" />
+      <button (click)="createVehicle()">+ Ajouter</button>
+    </div>
+    <div class="hint">
+      ⚠️ <b>code</b> est obligatoire (sinon backend 500: not-null property Vehicle.code)
+    </div>
+  </div>
+
+  <!-- UPDATE POSITION -->
+  <div class="card">
+    <div class="cardTitle">Mettre à jour la position</div>
+    <div class="row">
+      <input type="number" [(ngModel)]="posVehicleId" placeholder="Vehicle ID *" />
+      <input type="number" [(ngModel)]="posLatitude" placeholder="Latitude *" />
+      <input type="number" [(ngModel)]="posLongitude" placeholder="Longitude *" />
+      <input type="number" [(ngModel)]="posSpeed" placeholder="Speed (optionnel)" />
+      <input type="number" [(ngModel)]="posHeading" placeholder="Heading (optionnel)" />
+      <button (click)="updatePosition()">🛰️ Update Position</button>
+    </div>
+    <div class="hint">
+      Endpoint: <code>PUT /vehicles/{{ '{' }}id{{ '}' }}/position</code>
+    </div>
+  </div>
+
+  <!-- LIST -->
+  <div class="card">
+    <div class="cardTitle">Liste des véhicules</div>
+
+    <div *ngIf="loading">Chargement...</div>
+
+    <table *ngIf="!loading && vehicles.length">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Code</th>
+          <th>Line</th>
+          <th>Driver</th>
+          <th>Status</th>
+          <th>Lat</th>
+          <th>Lng</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let v of vehicles">
+          <td>{{ v.id }}</td>
+          <td>{{ v.code }}</td>
+          <td>{{ v.lineId ?? '-' }}</td>
+          <td>{{ v.driverId ?? '-' }}</td>
+          <td>{{ v.status ?? '-' }}</td>
+          <td>{{ v.latitude ?? '-' }}</td>
+          <td>{{ v.longitude ?? '-' }}</td>
+          <td class="actions">
+            <button class="mini" (click)="viewDetails(v.id)">Détails</button>
+            <button class="mini ghost" (click)="fillPositionFromVehicle(v)">Position</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && !vehicles.length" class="empty">
+      Aucun véhicule.
+    </div>
+  </div>
+
+  <!-- DETAILS -->
+  <div class="card" *ngIf="selected">
+    <div class="cardTitle">
+      Détails véhicule #{{ selected.id }} — {{ selected.code }}
+      <button class="mini ghost" (click)="clearDetails()">Fermer</button>
+    </div>
+
+    <div class="grid">
+      <div><span>Line:</span> {{ selected.lineId ?? '-' }}</div>
+      <div><span>Driver:</span> {{ selected.driverId ?? '-' }}</div>
+      <div><span>Status:</span> {{ selected.status ?? '-' }}</div>
+      <div><span>Signal:</span> {{ selected.signalState ?? '-' }}</div>
+
+      <div><span>Latitude:</span> {{ selected.latitude ?? '-' }}</div>
+      <div><span>Longitude:</span> {{ selected.longitude ?? '-' }}</div>
+      <div><span>Speed:</span> {{ selected.speed ?? '-' }}</div>
+      <div><span>Heading:</span> {{ selected.heading ?? '-' }}</div>
+
+      <div><span>Last Position:</span> {{ selected.lastPositionTime ?? '-' }}</div>
+      <div><span>Updated:</span> {{ selected.updatedAt ?? '-' }}</div>
+    </div>
+  </div>
+
+</div>
