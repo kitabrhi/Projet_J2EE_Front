@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import {
   VehicleService,
   VehicleResponse,
@@ -15,7 +16,7 @@ import {
   templateUrl: './vehicles.component.html',
   styleUrls: ['./vehicles.component.css']
 })
-export class VehiclesComponent {
+export class VehiclesComponent implements OnInit {
   vehicles: VehicleResponse[] = [];
   selected: VehicleResponse | null = null;
 
@@ -40,7 +41,7 @@ export class VehiclesComponent {
 
   constructor(private vehicleService: VehicleService) {}
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadVehicles();
   }
 
@@ -56,7 +57,7 @@ export class VehiclesComponent {
 
     this.vehicleService.getAll(this.filterLineId ?? undefined).subscribe({
       next: (data) => {
-        this.vehicles = data;
+        this.vehicles = data ?? [];
         this.loading = false;
       },
       error: (err) => {
@@ -110,7 +111,6 @@ export class VehiclesComponent {
       },
       error: (err) => {
         console.error(err);
-        // ton backend peut renvoyer "Code véhicule déjà utilisé"
         this.error = err?.error?.message || 'Erreur création véhicule.';
       }
     });
@@ -139,7 +139,6 @@ export class VehiclesComponent {
     this.vehicleService.updatePosition(this.posVehicleId, payload).subscribe({
       next: (updated) => {
         this.success = `Position mise à jour pour ${updated.code} (id=${updated.id}).`;
-        // refresh list + details if same
         this.loadVehicles();
         if (this.selected?.id === updated.id) {
           this.selected = updated;
@@ -161,5 +160,13 @@ export class VehiclesComponent {
     this.posHeading = v.heading ?? null;
     this.success = `Form position pré-rempli avec ${v.code} (id=${v.id}).`;
     this.error = null;
+  }
+
+  // UI helper badge
+  badgeClass(tripStatus?: string | null): string {
+    const s = (tripStatus || 'IDLE').toUpperCase();
+    if (s === 'RUNNING') return 'badge running';
+    if (s === 'FINISHED') return 'badge finished';
+    return 'badge idle';
   }
 }

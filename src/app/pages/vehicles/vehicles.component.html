@@ -63,6 +63,8 @@
           <th>Line</th>
           <th>Driver</th>
           <th>Status</th>
+          <th>Trip Status</th>
+          <th>Trip</th>
           <th>Lat</th>
           <th>Lng</th>
           <th>Actions</th>
@@ -71,13 +73,26 @@
 
       <tbody>
         <tr *ngFor="let v of vehicles">
-          <td>{{ v.id }}</td>
+          <td class="mono">{{ v.id }}</td>
           <td>{{ v.code }}</td>
-          <td>{{ v.lineId ?? '-' }}</td>
-          <td>{{ v.driverId ?? '-' }}</td>
-          <td>{{ v.status ?? '-' }}</td>
-          <td>{{ v.latitude ?? '-' }}</td>
-          <td>{{ v.longitude ?? '-' }}</td>
+          <td class="mono">{{ v.lineId ?? '-' }}</td>
+          <td class="mono">{{ v.driverId ?? '-' }}</td>
+          <td class="mono">{{ v.status ?? '-' }}</td>
+
+          <td>
+            <span [class]="badgeClass(v.tripStatus)">
+              {{ (v.tripStatus || 'IDLE') }}
+            </span>
+          </td>
+
+          <td class="mono">
+            {{ v.currentTripCode || '-' }}
+            <span class="muted"> {{ v.currentServiceDate || '' }}</span>
+          </td>
+
+          <td class="mono">{{ v.latitude ?? '-' }}</td>
+          <td class="mono">{{ v.longitude ?? '-' }}</td>
+
           <td class="actions">
             <button class="mini" (click)="viewDetails(v.id)">Détails</button>
             <button class="mini ghost" (click)="fillPositionFromVehicle(v)">Position</button>
@@ -93,8 +108,10 @@
 
   <!-- DETAILS -->
   <div class="card" *ngIf="selected">
-    <div class="cardTitle">
-      Détails véhicule #{{ selected.id }} — {{ selected.code }}
+    <div class="cardTitle detailsTitle">
+      <div>
+        Détails véhicule #{{ selected.id }} — {{ selected.code }}
+      </div>
       <button class="mini ghost" (click)="clearDetails()">Fermer</button>
     </div>
 
@@ -111,6 +128,12 @@
 
       <div><span>Last Position:</span> {{ selected.lastPositionTime ?? '-' }}</div>
       <div><span>Updated:</span> {{ selected.updatedAt ?? '-' }}</div>
+
+      <!-- ✅ TRIP DETAILS -->
+      <div><span>Trip Status:</span> {{ selected.tripStatus ?? 'IDLE' }}</div>
+      <div><span>Trip Code:</span> {{ selected.currentTripCode ?? '-' }}</div>
+      <div><span>Trip Date:</span> {{ selected.currentServiceDate ?? '-' }}</div>
+      <div><span>Trip Started At:</span> {{ selected.tripStartedAt ?? '-' }}</div>
     </div>
   </div>
 

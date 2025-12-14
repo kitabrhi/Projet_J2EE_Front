@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { StartTripRequest } from '../models/start-trip.model';
 
 export interface VehicleCreateRequest {
-  code: string;         // obligatoire
+  code: string;
   lineId?: number;
   driverId?: number;
 }
@@ -18,50 +19,56 @@ export interface UpdatePositionRequest {
 export interface VehicleResponse {
   id: number;
   code: string;
-  lineId?: number;
-  driverId?: number;
 
-  latitude?: number;
-  longitude?: number;
-  speed?: number;
-  heading?: number;
+  lineId?: number | null;
+  driverId?: number | null;
 
-  lastPositionTime?: string;
-  signalState?: string;
-  status?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  speed?: number | null;
+  heading?: number | null;
 
-  createdAt?: string;
-  updatedAt?: string;
+  lastPositionTime?: string | null;
+
+  status?: string | null;
+  signalState?: string | null;
+
+  createdAt?: string | null;
+  updatedAt?: string | null;
+
+  currentTripCode?: string | null;
+  currentServiceDate?: string | null;
+  tripStartedAt?: string | null;
+  tripStatus?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class VehicleService {
-  private baseUrl = 'http://localhost:8080';
+ 
+  // ⚠️ adapte selon ton gateway
+  private readonly baseUrl = 'http://localhost:8080/vehicles';
 
   constructor(private http: HttpClient) {}
 
-  // GET /vehicles?lineId=...
   getAll(lineId?: number): Observable<VehicleResponse[]> {
-    const url = lineId != null
-      ? `${this.baseUrl}/vehicles?lineId=${lineId}`
-      : `${this.baseUrl}/vehicles`;
-    return this.http.get<VehicleResponse[]>(url);
+    let params = new HttpParams();
+    if (lineId != null) params = params.set('lineId', String(lineId));
+    return this.http.get<VehicleResponse[]>(this.baseUrl, { params });
   }
 
-  // GET /vehicles/{id}
   getById(id: number): Observable<VehicleResponse> {
-    return this.http.get<VehicleResponse>(`${this.baseUrl}/vehicles/${id}`);
+    return this.http.get<VehicleResponse>(`${this.baseUrl}/${id}`);
   }
 
-  // POST /vehicles
-  create(req: VehicleCreateRequest): Observable<VehicleResponse> {
-    console.log('POST /vehicles payload =>', req);
-    return this.http.post<VehicleResponse>(`${this.baseUrl}/vehicles`, req);
+  create(payload: VehicleCreateRequest): Observable<VehicleResponse> {
+    return this.http.post<VehicleResponse>(this.baseUrl, payload);
   }
 
-  // PUT /vehicles/{id}/position
-  updatePosition(id: number, req: UpdatePositionRequest): Observable<VehicleResponse> {
-    console.log(`PUT /vehicles/${id}/position payload =>`, req);
-    return this.http.put<VehicleResponse>(`${this.baseUrl}/vehicles/${id}/position`, req);
+  updatePosition(id: number, payload: UpdatePositionRequest): Observable<VehicleResponse> {
+    return this.http.put<VehicleResponse>(`${this.baseUrl}/${id}/position`, payload);
+  }
+
+  startTrip(vehicleId: number, payload: StartTripRequest): Observable<VehicleResponse> {
+    return this.http.post<VehicleResponse>(`${this.baseUrl}/${vehicleId}/start-trip`, payload);
   }
 }

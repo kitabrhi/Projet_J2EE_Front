@@ -4,6 +4,22 @@ import { API_BASE_URL } from '../config/api.config';
 import { Observable } from 'rxjs';
 import { PlannedStopTime } from '../models/planned-stop-time.model';
 
+
+
+export interface CreateTripStopsPayload {
+  lineId: number;
+  routeId: number;
+  tripCode: string;
+  serviceDate: string; // YYYY-MM-DD
+  stops: Array<{
+    stopId: number;
+    sequence: number;
+    arrivalTime: string;           // HH:mm
+    departureTime?: string | null; // HH:mm
+    active?: boolean;
+  }>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ScheduleService {
 
@@ -11,6 +27,7 @@ export class ScheduleService {
 
   constructor(private http: HttpClient) {}
 
+  // ===== CRUD schedule (1 row = 1 stop time)
   create(payload: PlannedStopTime): Observable<PlannedStopTime> {
     return this.http.post<PlannedStopTime>(this.base, payload);
   }
@@ -50,14 +67,34 @@ export class ScheduleService {
     return this.http.get<PlannedStopTime[]>(`${this.base}/line/${lineId}/stop/${stopId}`, { params });
   }
 
-  nextDepartures(lineId: number, stopId: number, date: string, fromTime: string, limit = 5): Observable<PlannedStopTime[]> {
-    let params = new HttpParams()
-      .set('lineId', lineId)
-      .set('stopId', stopId)
+  nextDepartures(
+    lineId: number,
+    stopId: number,
+    date: string,
+    fromTime: string,
+    limit = 5
+  ): Observable<PlannedStopTime[]> {
+
+    // ✅ HttpParams needs string values
+    const params = new HttpParams()
+      .set('lineId', String(lineId))
+      .set('stopId', String(stopId))
       .set('date', date)
       .set('fromTime', fromTime)
-      .set('limit', limit);
+      .set('limit', String(limit));
 
     return this.http.get<PlannedStopTime[]>(`${this.base}/next`, { params });
+  }
+
+  // ===== Trip stops (bulk) ✅
+  createTripStops(payload: CreateTripStopsPayload): Observable<PlannedStopTime[]> {
+    return this.http.post<PlannedStopTime[]>(`${this.base}/trip-stops`, payload);
+  }
+
+  getTripStops(tripCode: string, date: string): Observable<PlannedStopTime[]> {
+    const params = new HttpParams()
+      .set('tripCode', tripCode)
+      .set('date', date);
+    return this.http.get<PlannedStopTime[]>(`${this.base}/trip-stops`, { params });
   }
 }

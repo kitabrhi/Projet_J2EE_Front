@@ -1,15 +1,204 @@
 <div class="wrap">
 
+  <!-- HEADER -->
   <div class="header">
     <div>
       <h2>🗓️ Planification (Schedule)</h2>
-      <p class="muted">CRUD + Search + Next departures</p>
+      <p class="muted">CRUD + Search + Next departures + Stops + Start Trip (même page)</p>
     </div>
+
     <div class="actions">
-      <button class="btn" (click)="search()">🔄 Refresh</button>
+      <button class="btn" (click)="loadStops()">📍 Refresh Stops</button>
+      <button class="btn" (click)="search()">🔄 Refresh Schedule</button>
+      <button class="btn" (click)="loadVehicles()">🚍 Refresh Vehicles</button>
     </div>
   </div>
 
+  <!-- =======================
+       TRIP BUILDER (BULK)
+  ======================= -->
+  <div class="card">
+    <h3>🧩 Trajet (Trip) → plusieurs stops</h3>
+    <p class="muted">
+      Crée un trajet complet d’un coup via <b>/schedule/trip-stops</b>
+    </p>
+
+    <div class="grid">
+      <div>
+        <label>Line ID *</label>
+        <input type="number" [(ngModel)]="tripLineId" />
+      </div>
+
+      <div>
+        <label>Route ID *</label>
+        <input type="number" [(ngModel)]="tripRouteId" />
+      </div>
+
+      <div>
+        <label>Trip Code *</label>
+        <input [(ngModel)]="tripCode" placeholder="L1_08H30_A" />
+      </div>
+
+      <div>
+        <label>Service Date *</label>
+        <input type="date" [(ngModel)]="tripDate" />
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn" (click)="addTripStopRow()">➕ Add stop</button>
+
+      <button class="btn primary" (click)="createTripStops()" [disabled]="tripLoading">
+        {{ tripLoading ? 'Saving...' : 'Save Trip Stops' }}
+      </button>
+
+      <button class="btn" (click)="loadTripStops()" [disabled]="tripLoading">
+        {{ tripLoading ? 'Loading...' : 'Load Trip Stops' }}
+      </button>
+    </div>
+
+    <div class="error" *ngIf="tripError">{{ tripError }}</div>
+    <div class="loading" *ngIf="tripLoading">Processing...</div>
+    <div class="loading" *ngIf="tripSuccess">{{ tripSuccess }}</div>
+
+    <div style="margin-top:12px; overflow:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:80px;">Seq</th>
+            <th>Stop</th>
+            <th style="width:140px;">Arrival</th>
+            <th style="width:140px;">Departure</th>
+            <th style="width:90px;">Active</th>
+            <th style="width:220px;">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let r of tripStops; let i = index">
+            <td class="mono">{{ r.sequence }}</td>
+
+            <td>
+              <select [(ngModel)]="r.stopId">
+                <option [ngValue]="null">-- choose stop --</option>
+                <option *ngFor="let st of stops" [ngValue]="st.id">
+                  #{{ st.id }} - {{ st.name }}
+                </option>
+              </select>
+            </td>
+
+            <td><input type="time" [(ngModel)]="r.arrivalTime" /></td>
+            <td><input type="time" [(ngModel)]="r.departureTime" /></td>
+
+            <td class="center">
+              <input type="checkbox" [(ngModel)]="r.active" />
+            </td>
+
+            <td class="actionsCell">
+              <button class="btn" (click)="moveTripStopRowUp(i)">↑</button>
+              <button class="btn" (click)="moveTripStopRowDown(i)">↓</button>
+              <button class="btn danger" (click)="removeTripStopRow(i)">Remove</button>
+            </td>
+          </tr>
+
+          <tr *ngIf="tripStops.length === 0">
+            <td colspan="6" class="muted center">Ajoute au moins un stop.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =======================
+       STOPS CRUD
+  ======================= -->
+  <div class="card">
+    <div class="tableHeader">
+      <h3>📍 Stops (Arrêts)</h3>
+      <div class="search">
+        <input [(ngModel)]="stopQ" placeholder="Search stop by name / code..." />
+      </div>
+    </div>
+
+    <div class="subCard">
+      <h4>➕ {{ stopEditId ? 'Modifier' : 'Créer' }} un stop</h4>
+
+      <div class="grid stopGrid">
+        <div>
+          <label>Nom *</label>
+          <input [(ngModel)]="stopForm.name" placeholder="Donor" />
+        </div>
+
+        <div>
+          <label>Code (optionnel)</label>
+          <input [(ngModel)]="stopForm.code" placeholder="STOP_DONOR" />
+        </div>
+
+        <div>
+          <label>Latitude *</label>
+          <input type="number" step="0.000001" [(ngModel)]="stopForm.latitude" placeholder="33.590000" />
+        </div>
+
+        <div>
+          <label>Longitude *</label>
+          <input type="number" step="0.000001" [(ngModel)]="stopForm.longitude" placeholder="-7.620000" />
+        </div>
+      </div>
+
+      <div class="row">
+        <button class="btn primary" (click)="stopSubmit()">
+          {{ stopEditId ? 'Update Stop' : 'Create Stop' }}
+        </button>
+
+        <button class="btn ghost" *ngIf="stopEditId" (click)="stopCancelEdit()">Cancel</button>
+        <button class="btn" (click)="stopResetForm()">New</button>
+      </div>
+
+      <div class="error" *ngIf="stopError">{{ stopError }}</div>
+    </div>
+
+    <div class="loading" *ngIf="stopLoading">Loading stops...</div>
+
+    <table *ngIf="!stopLoading">
+      <thead>
+        <tr>
+          <th style="width:70px;">ID</th>
+          <th>Nom</th>
+          <th style="width:160px;">Code</th>
+          <th style="width:170px;">Lat</th>
+          <th style="width:170px;">Lon</th>
+          <th style="width:180px;">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let s of filteredStops()">
+          <td class="mono">{{ s.id }}</td>
+          <td>
+            <div class="nameCell">
+              <span class="dot"></span>
+              <span>{{ s.name }}</span>
+            </div>
+          </td>
+          <td class="mono muted">{{ s.code || '-' }}</td>
+          <td class="mono">{{ s.latitude }}</td>
+          <td class="mono">{{ s.longitude }}</td>
+          <td class="actionsCell">
+            <button class="btn" (click)="stopEdit(s)">Edit</button>
+            <button class="btn danger" (click)="stopRemove(s)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!stopLoading && filteredStops().length === 0">
+          <td colspan="6" class="muted center">Aucun stop</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- =======================
+       SCHEDULE SEARCH
+  ======================= -->
   <div class="card">
     <h3>🔎 Recherche</h3>
 
@@ -18,13 +207,20 @@
         <label>Date</label>
         <input type="date" [(ngModel)]="sDate" />
       </div>
+
       <div>
         <label>Line ID</label>
         <input type="number" [(ngModel)]="sLineId" />
       </div>
+
       <div>
-        <label>Stop ID</label>
-        <input type="number" [(ngModel)]="sStopId" />
+        <label>Stop</label>
+        <select [(ngModel)]="sStopId">
+          <option [ngValue]="null">-- All stops --</option>
+          <option *ngFor="let st of stops" [ngValue]="st.id">
+            #{{ st.id }} - {{ st.name }}
+          </option>
+        </select>
       </div>
     </div>
 
@@ -37,6 +233,71 @@
     </div>
   </div>
 
+  <!-- =======================
+       START TRIP (Vehicle -> Trip)
+  ======================= -->
+  <div class="card">
+    <h3>🚍 Start Trip (Lier Véhicule à un Trip)</h3>
+    <p class="muted">Démarre un trajet existant (tripCode + date) sur un véhicule.</p>
+
+    <div class="loading" *ngIf="vLoading">Loading vehicles...</div>
+    <div class="error" *ngIf="vError">{{ vError }}</div>
+
+    <div class="grid">
+      <div>
+        <label>Vehicle *</label>
+        <select [(ngModel)]="startVehicleId">
+          <option [ngValue]="null">-- Choose vehicle --</option>
+          <option *ngFor="let v of vehicles" [ngValue]="v.id">
+            #{{ v.id }} - {{ v.code }} (Line {{ v.lineId ?? '-' }})
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label>Trip Code *</label>
+        <input [(ngModel)]="startTripCode" placeholder="L3_0600_DONOR_H2" />
+      </div>
+
+      <div>
+        <label>Date *</label>
+        <input type="date" [(ngModel)]="startServiceDate" />
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn" (click)="previewTripStopsForStartTrip()" [disabled]="tripPreviewLoading">
+        👀 Preview Trip Stops
+      </button>
+
+      <button class="btn primary" (click)="startTrip()" [disabled]="tripPreviewLoading">
+        ▶️ Start Trip
+      </button>
+
+      <button class="btn" (click)="loadVehicles()">
+        🔄 Refresh Vehicles
+      </button>
+    </div>
+
+    <div class="loading" *ngIf="tripPreviewLoading">Loading trip stops...</div>
+
+    <div class="miniTable" *ngIf="!tripPreviewLoading && tripPreview.length">
+      <div class="miniRow" *ngFor="let x of tripPreview">
+        <div>#{{ x.id }}</div>
+        <div>Stop: #{{ x.stopId }} • {{ getStopName(x.stopId) }}</div>
+        <div>Arr: {{ x.plannedArrivalTime }}</div>
+        <div>Dep: {{ x.plannedDepartureTime || '-' }}</div>
+      </div>
+    </div>
+
+    <div class="muted" *ngIf="!tripPreviewLoading && !tripPreview.length">
+      Aucun preview pour le moment.
+    </div>
+  </div>
+
+  <!-- =======================
+       NEXT DEPARTURES
+  ======================= -->
   <div class="card">
     <h3>⏭️ Prochains départs</h3>
 
@@ -45,18 +306,27 @@
         <label>Line ID</label>
         <input type="number" [(ngModel)]="nLineId" />
       </div>
+
       <div>
-        <label>Stop ID</label>
-        <input type="number" [(ngModel)]="nStopId" />
+        <label>Stop</label>
+        <select [(ngModel)]="nStopId">
+          <option [ngValue]="null">-- Choose stop --</option>
+          <option *ngFor="let st of stops" [ngValue]="st.id">
+            #{{ st.id }} - {{ st.name }}
+          </option>
+        </select>
       </div>
+
       <div>
         <label>Date</label>
         <input type="date" [(ngModel)]="nDate" />
       </div>
+
       <div>
         <label>From Time</label>
         <input type="time" [(ngModel)]="nFromTime" />
       </div>
+
       <div>
         <label>Limit</label>
         <input type="number" [(ngModel)]="nLimit" />
@@ -77,6 +347,9 @@
     </div>
   </div>
 
+  <!-- =======================
+       CREATE/UPDATE SINGLE ROW SCHEDULE
+  ======================= -->
   <div class="card">
     <h3>➕ {{ editId ? 'Modifier' : 'Créer' }} un horaire</h3>
 
@@ -85,13 +358,19 @@
         <label>Line ID *</label>
         <input type="number" [(ngModel)]="form.lineId" />
       </div>
+
       <div>
         <label>Route ID *</label>
         <input type="number" [(ngModel)]="form.routeId" />
       </div>
+
       <div>
-        <label>Stop ID *</label>
-        <input type="number" [(ngModel)]="form.stopId" />
+        <label>Stop *</label>
+        <select [(ngModel)]="form.stopId">
+          <option *ngFor="let st of stops" [ngValue]="st.id">
+            #{{ st.id }} - {{ st.name }}
+          </option>
+        </select>
       </div>
 
       <div>
@@ -131,9 +410,11 @@
     </div>
   </div>
 
+  <!-- GLOBAL ERR/LOAD -->
   <div class="error" *ngIf="error">{{ error }}</div>
   <div class="loading" *ngIf="loading">Loading...</div>
 
+  <!-- RESULTS -->
   <div class="card">
     <h3>📋 Résultats</h3>
 
@@ -160,7 +441,12 @@
           <td>{{ row.lineId }}</td>
           <td>{{ row.routeId }}</td>
           <td>{{ row.tripCode || '-' }}</td>
-          <td>{{ row.stopId }}</td>
+
+          <td>
+            <span class="mono">#{{ row.stopId }}</span>
+            <span class="muted"> • {{ getStopName(row.stopId) }}</span>
+          </td>
+
           <td>{{ row.serviceDate }}</td>
           <td>{{ row.plannedArrivalTime }}</td>
           <td>{{ row.plannedDepartureTime || '-' }}</td>
