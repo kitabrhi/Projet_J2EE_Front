@@ -1,0 +1,279 @@
+<div class="wrap">
+  <!-- Header avec animation -->
+  <div class="header">
+    <div class="header-content">
+      <div class="icon-wrapper">
+        <span class="icon">🚨</span>
+      </div>
+      <div>
+        <h2>Alertes</h2>
+        <p class="muted">Système de monitoring en temps réel</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn ghost" (click)="openOnly()">
+        <span class="btn-icon">📂</span>
+        OPEN only
+      </button>
+      <button class="btn primary" (click)="refreshAll()">
+        <span class="btn-icon">🔄</span>
+        Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats Grid avec cartes animées -->
+  <div class="stats-grid">
+    <div class="stat-card status-card" *ngFor="let k of (statsStatus | keyvalue); let i = index" 
+         [style.animation-delay.ms]="i * 100">
+      <div class="stat-icon" [ngClass]="getStatusIconClass(k.key)">
+        {{ getStatusIcon(k.key) }}
+      </div>
+      <div class="stat-content">
+        <div class="stat-value">{{ k.value }}</div>
+        <div class="stat-label">{{ k.key }}</div>
+      </div>
+      <div class="stat-progress" [style.width.%]="getPercentage(k.value, statsStatus)"></div>
+    </div>
+  </div>
+
+  <!-- Severity Stats avec indicateurs visuels -->
+  <div class="severity-grid">
+    <div class="severity-card" *ngFor="let k of (statsSeverity | keyvalue); let i = index"
+         [ngClass]="getSeverityClass(k.key)"
+         [style.animation-delay.ms]="100 + i * 100">
+      <div class="severity-header">
+        <span class="severity-icon">{{ getSeverityIcon(k.key) }}</span>
+        <span class="severity-label">{{ k.key }}</span>
+      </div>
+      <div class="severity-value">{{ k.value }}</div>
+      <div class="severity-bar">
+        <div class="severity-bar-fill" [style.width.%]="getPercentage(k.value, statsSeverity)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Alerts Timeline -->
+  <div class="card recent-card">
+    <div class="card-header">
+      <h3>⚡ Dernières Alertes</h3>
+      <span class="badge-count">{{ recent.length }}</span>
+    </div>
+    
+    <div class="timeline" *ngIf="recent.length > 0; else noRecent">
+      <div class="timeline-item" *ngFor="let a of recent; let i = index" 
+           [style.animation-delay.ms]="i * 80">
+        <div class="timeline-marker" [ngClass]="getSeverityClass(a.severity)"></div>
+        <div class="timeline-content">
+          <div class="timeline-header">
+            <span [class]="badgeClassSeverity(a.severity)">{{ a.severity }}</span>
+            <span class="timeline-time">{{ formatTime(a.createdAt) }}</span>
+          </div>
+          <div class="timeline-title">{{ a.title || a.type }}</div>
+          <div class="timeline-meta">#{{ a.id }} • {{ formatDate(a.createdAt) }}</div>
+        </div>
+      </div>
+    </div>
+    
+    <ng-template #noRecent>
+      <div class="empty-state">
+        <span class="empty-icon">📭</span>
+        <p>Aucune alerte récente</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Filters Card avec design moderne -->
+  <div class="card filter-card">
+    <div class="card-header">
+      <h3>🔍 Filtres de Recherche</h3>
+      <button class="btn-link" (click)="clearFilters()">Réinitialiser</button>
+    </div>
+
+    <div class="filters-grid">
+      <div class="field">
+        <label>
+          <span class="label-icon">📊</span>
+          Status
+        </label>
+        <select [(ngModel)]="status" class="select-modern">
+          <option value="">Tous les statuts</option>
+          <option value="OPEN">🔵 OPEN</option>
+          <option value="IN_PROGRESS">🟡 IN PROGRESS</option>
+          <option value="RESOLVED">🟢 RESOLVED</option>
+          <option value="CLOSED">⚫ CLOSED</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="label-icon">⚠️</span>
+          Severity
+        </label>
+        <select [(ngModel)]="severity" class="select-modern">
+          <option value="">Toutes les sévérités</option>
+          <option value="INFO">ℹ️ INFO</option>
+          <option value="WARNING">⚠️ WARNING</option>
+          <option value="CRITICAL">🔴 CRITICAL</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="label-icon">🚗</span>
+          Vehicle ID
+        </label>
+        <input type="number" [(ngModel)]="vehicleId" placeholder="ex: 4" class="input-modern">
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="label-icon">🛣️</span>
+          Line ID
+        </label>
+        <input type="number" [(ngModel)]="lineId" placeholder="ex: 1" class="input-modern">
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="label-icon">🚏</span>
+          Stop ID
+        </label>
+        <input type="number" [(ngModel)]="stopId" placeholder="ex: 100" class="input-modern">
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="label-icon">📅</span>
+          Date Début
+        </label>
+        <input type="datetime-local" [(ngModel)]="fromDate" class="input-modern">
+      </div>
+
+      <div class="field">
+        <label>
+          <span class="label-icon">📅</span>
+          Date Fin
+        </label>
+        <input type="datetime-local" [(ngModel)]="toDate" class="input-modern">
+      </div>
+
+      <div class="field field-action">
+        <button class="btn primary full-width" (click)="search()">
+          <span class="btn-icon">🔍</span>
+          Rechercher
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Card -->
+  <div class="card results-card">
+    <div class="card-header">
+      <h3>📋 Résultats</h3>
+      <span class="badge-count" *ngIf="!loading">{{ alerts.length }} alerte(s)</span>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="loading">
+      <div class="spinner"></div>
+      <p>Chargement des données...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="error && !loading">
+      <span class="error-icon">⚠️</span>
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container" *ngIf="!loading && !error">
+      <table class="modern-table" *ngIf="alerts.length > 0; else empty">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Severity</th>
+            <th>Status</th>
+            <th>Vehicle</th>
+            <th>Line</th>
+            <th>Stop</th>
+            <th>Delay</th>
+            <th>Informations</th>
+            <th>Date</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let a of alerts; let i = index" class="table-row" 
+              [style.animation-delay.ms]="i * 50">
+            <td>
+              <span class="id-badge">#{{ a.id }}</span>
+            </td>
+            <td>
+              <span class="type-badge">{{ a.type }}</span>
+            </td>
+            <td>
+              <span [class]="badgeClassSeverity(a.severity)">
+                {{ getSeverityIcon(a.severity) }} {{ a.severity }}
+              </span>
+            </td>
+            <td>
+              <span [class]="badgeClassStatus(a.status)">{{ a.status }}</span>
+            </td>
+            <td>
+              <span class="data-value">{{ a.vehicleId ?? '-' }}</span>
+            </td>
+            <td>
+              <span class="data-value">{{ a.lineId ?? '-' }}</span>
+            </td>
+            <td>
+              <span class="data-value">{{ a.stopId ?? '-' }}</span>
+            </td>
+            <td>
+              <span class="delay-badge" *ngIf="a.delayMinutes">
+                ⏱️ {{ a.delayMinutes }}min
+              </span>
+              <span *ngIf="!a.delayMinutes">-</span>
+            </td>
+            <td class="info-cell">
+              <div class="info-title">{{ a.title || '-' }}</div>
+              <div class="info-details" *ngIf="a.details">{{ a.details }}</div>
+            </td>
+            <td>
+              <div class="date-cell">
+                <div class="date-value">{{ formatDate(a.createdAt) }}</div>
+                <div class="time-value">{{ formatTime(a.createdAt) }}</div>
+              </div>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <select (change)="setStatus(a, $any($event.target).value)" class="select-action">
+                  <option value="">Changer...</option>
+                  <option value="OPEN">🔵 OPEN</option>
+                  <option value="IN_PROGRESS">🟡 IN PROGRESS</option>
+                  <option value="RESOLVED">🟢 RESOLVED</option>
+                  <option value="CLOSED">⚫ CLOSED</option>
+                </select>
+
+                <button class="btn-icon-action danger" (click)="deleteAlert(a)" title="Supprimer">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #empty>
+        <div class="empty-state large">
+          <span class="empty-icon">📊</span>
+          <h4>Aucune alerte trouvée</h4>
+          <p>Essayez de modifier vos filtres de recherche</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,156 @@
+<div class="wrap">
+  <div class="header">
+    <div>
+      <h2>⚠️ Incidents</h2>
+      <p class="muted">Créer, filtrer, modifier le statut et supprimer.</p>
+    </div>
+
+    <div class="actions">
+      <button class="btn" (click)="refresh()">🔄 Refresh</button>
+      <button class="btn" (click)="openOnly()">OPEN</button>
+      <button class="btn" (click)="recent()">Recent</button>
+    </div>
+  </div>
+
+  <div class="stats" *ngIf="keys(stats).length">
+    <div class="stat" *ngFor="let k of keys(stats)">
+      <div class="k">{{ k }}</div>
+      <div class="v">{{ stats[k] }}</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🔎 Filtres</h3>
+
+    <div class="grid">
+      <div>
+        <label>Status</label>
+        <input [(ngModel)]="fStatus" placeholder="OPEN / RESOLVED ..." />
+      </div>
+      <div>
+        <label>Severity</label>
+        <input [(ngModel)]="fSeverity" placeholder="LOW / MEDIUM / HIGH" />
+      </div>
+      <div>
+        <label>Vehicle ID</label>
+        <input type="number" [(ngModel)]="fVehicleId" />
+      </div>
+      <div>
+        <label>Line ID</label>
+        <input type="number" [(ngModel)]="fLineId" />
+      </div>
+      <div>
+        <label>Reported By</label>
+        <input [(ngModel)]="fReportedBy" placeholder="ex: driver_12" />
+      </div>
+      <div>
+        <label>Limit (Recent)</label>
+        <input type="number" [(ngModel)]="fLimit" />
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn primary" (click)="search()">Search</button>
+      <button class="btn ghost" (click)="fStatus='';fSeverity='';fVehicleId=null;fLineId=null;fReportedBy='';">Clear</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>➕ Déclarer un Incident</h3>
+
+    <div class="grid">
+      <div>
+        <label>Type</label>
+        <input [(ngModel)]="form.type" placeholder="ACCIDENT / BREAKDOWN ..." />
+      </div>
+      <div>
+        <label>Severity</label>
+        <select [(ngModel)]="form.severity">
+          <option value="LOW">LOW</option>
+          <option value="MEDIUM">MEDIUM</option>
+          <option value="HIGH">HIGH</option>
+        </select>
+      </div>
+      <div>
+        <label>Vehicle ID</label>
+        <input type="number" [(ngModel)]="form.vehicleId" />
+      </div>
+      <div>
+        <label>Line ID</label>
+        <input type="number" [(ngModel)]="form.lineId" />
+      </div>
+      <div>
+        <label>Stop ID</label>
+        <input type="number" [(ngModel)]="form.stopId" />
+      </div>
+      <div>
+        <label>Trip ID</label>
+        <input [(ngModel)]="form.tripId" />
+      </div>
+      <div>
+        <label>Reported By</label>
+        <input [(ngModel)]="form.reportedBy" />
+      </div>
+      <div class="full">
+        <label>Description</label>
+        <textarea [(ngModel)]="form.description" rows="3"></textarea>
+      </div>
+    </div>
+
+    <div class="row">
+      <button class="btn primary" (click)="create()">Create</button>
+    </div>
+  </div>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+  <div class="loading" *ngIf="loading">Loading...</div>
+
+  <div class="card">
+    <h3>📋 Liste</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Vehicle</th>
+          <th>Line</th>
+          <th>ReportedBy</th>
+          <th>ReportedAt</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let inc of incidents">
+          <td>{{ inc.id }}</td>
+          <td>{{ inc.type }}</td>
+          <td>{{ inc.severity }}</td>
+          <td>
+            <span class="badge">{{ inc.status }}</span>
+          </td>
+          <td>{{ inc.vehicleId }}</td>
+          <td>{{ inc.lineId }}</td>
+          <td>{{ inc.reportedBy }}</td>
+          <td class="muted">{{ inc.reportedAt }}</td>
+          <td class="actionsCell">
+            <select (change)="changeStatus(inc, $any($event.target).value)">
+              <option value="">Change...</option>
+              <option value="OPEN">OPEN</option>
+              <option value="IN_PROGRESS">IN_PROGRESS</option>
+              <option value="RESOLVED">RESOLVED</option>
+              <option value="CLOSED">CLOSED</option>
+            </select>
+            <button class="btn danger" (click)="remove(inc)">Delete</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!loading && incidents.length === 0">
+          <td colspan="9" class="muted center">Aucun incident</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
