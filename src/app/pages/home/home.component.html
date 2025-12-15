@@ -1,0 +1,173 @@
+<div class="home-page">
+    <!-- Welcome Hero Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <div class="hero-icon">👋</div>
+        <h1 class="hero-title">Bienvenue, {{ username || 'Utilisateur' }} !</h1>
+        <p class="hero-subtitle">Tableau de bord de gestion transport en temps réel</p>
+        <div class="hero-time">
+          <span class="time-icon">🕐</span>
+          <span>{{ currentTime }}</span>
+        </div>
+      </div>
+      <div class="hero-decoration"></div>
+    </div>
+  
+    <!-- Stats Grid Premium -->
+    <div class="stats-section">
+      <h2 class="section-title">
+        <span class="title-icon">📊</span>
+        Vue d'ensemble
+      </h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card vehicles">
+          <div class="stat-header">
+            <div class="stat-icon">🚍</div>
+            <span class="stat-badge">En ligne</span>
+          </div>
+          <div class="stat-value">42</div>
+          <div class="stat-label">Véhicules actifs</div>
+          <div class="stat-progress">
+            <div class="stat-progress-bar" style="width: 75%"></div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend up">↗ +5 aujourd'hui</span>
+          </div>
+        </div>
+  
+        <div class="stat-card alerts">
+          <div class="stat-header">
+            <div class="stat-icon">🚨</div>
+            <span class="stat-badge warning">Actif</span>
+          </div>
+          <div class="stat-value">8</div>
+          <div class="stat-label">Alertes ouvertes</div>
+          <div class="stat-progress">
+            <div class="stat-progress-bar warning" style="width: 45%"></div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend">2 critiques</span>
+          </div>
+        </div>
+  
+        <div class="stat-card incidents">
+          <div class="stat-header">
+            <div class="stat-icon">⚠️</div>
+            <span class="stat-badge danger">Urgent</span>
+          </div>
+          <div class="stat-value">3</div>
+          <div class="stat-label">Incidents signalés</div>
+          <div class="stat-progress">
+            <div class="stat-progress-bar danger" style="width: 30%"></div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend down">↘ -2 vs hier</span>
+          </div>
+        </div>
+  
+        <div class="stat-card planning">
+          <div class="stat-header">
+            <div class="stat-icon">📅</div>
+            <span class="stat-badge success">Planifié</span>
+          </div>
+          <div class="stat-value">15</div>
+          <div class="stat-label">Trajets planifiés</div>
+          <div class="stat-progress">
+            <div class="stat-progress-bar success" style="width: 90%"></div>
+          </div>
+          <div class="stat-footer">
+            <span class="stat-trend up">↗ 100% complétés</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Quick Actions Section -->
+    <div class="actions-section">
+      <h2 class="section-title">
+        <span class="title-icon">⚡</span>
+        Actions rapides
+      </h2>
+      
+      <div class="actions-grid">
+        <a routerLink="/dashboard/vehicles" class="action-card">
+          <div class="action-icon-wrapper vehicles">
+            <span class="action-icon">🚍</span>
+          </div>
+          <div class="action-content">
+            <h3>Gérer les véhicules</h3>
+            <p>Ajouter, modifier ou suivre vos véhicules</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+  
+        <a routerLink="/dashboard/alerts" class="action-card">
+          <div class="action-icon-wrapper alerts">
+            <span class="action-icon">🚨</span>
+          </div>
+          <div class="action-content">
+            <h3>Voir les alertes</h3>
+            <p>Gérer les alertes en temps réel</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+  
+        <a routerLink="/dashboard/incidents" class="action-card">
+          <div class="action-icon-wrapper incidents">
+            <span class="action-icon">⚠️</span>
+          </div>
+          <div class="action-content">
+            <h3>Signaler incident</h3>
+            <p>Déclarer un nouvel incident</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+  
+        <a routerLink="/dashboard/planning" class="action-card">
+          <div class="action-icon-wrapper planning">
+            <span class="action-icon">📅</span>
+          </div>
+          <div class="action-content">
+            <h3>Planification</h3>
+            <p>Consulter et gérer les horaires</p>
+          </div>
+          <div class="action-arrow">→</div>
+        </a>
+      </div>
+    </div>
+  
+    <!-- Recent Activity -->
+    <div class="activity-section">
+      <h2 class="section-title">
+        <span class="title-icon">📋</span>
+        Activité récente
+      </h2>
+      
+      <div class="activity-list">
+        <div class="activity-item">
+          <div class="activity-icon success">✓</div>
+          <div class="activity-content">
+            <div class="activity-title">Véhicule BUS_104 démarré</div>
+            <div class="activity-time">Il y a 5 minutes</div>
+          </div>
+        </div>
+  
+        <div class="activity-item">
+          <div class="activity-icon warning">!</div>
+          <div class="activity-content">
+            <div class="activity-title">Alerte retard Ligne 3</div>
+            <div class="activity-time">Il y a 12 minutes</div>
+          </div>
+        </div>
+  
+        <div class="activity-item">
+          <div class="activity-icon info">i</div>
+          <div class="activity-content">
+            <div class="activity-title">Nouveau trajet planifié</div>
+            <div class="activity-time">Il y a 1 heure</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
